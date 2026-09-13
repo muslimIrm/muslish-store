@@ -36,7 +36,7 @@ const OrderDetailsDialog: FC<Props> = ({ order, isOpen, onClose }) => {
           </p>
           <p>
             <strong>Date: </strong>{" "}
-            {order?.customerName
+            {order?.orderDate
               ? format(new Date(order.orderDate), "dd/MM/yyyy")
               : ""}
           </p>

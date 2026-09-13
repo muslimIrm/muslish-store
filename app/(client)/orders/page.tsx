@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TableHead, TableHeader, TableRow, Table } from "@/components/ui/table";
 import OrdersComponents from "@/components/OrdersComponents";
-import { Order } from "@/sanity.types";
+import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 const OrdersPage = async () => {
   await requiredUser();
   const { userId } = await auth();
@@ -46,7 +46,7 @@ const OrdersPage = async () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <OrdersComponents orders={orders as Order[]} />
+                <OrdersComponents orders={orders as MY_ORDERS_QUERY_RESULT} />
               </Table>
               <ScrollBar />
             </ScrollArea>

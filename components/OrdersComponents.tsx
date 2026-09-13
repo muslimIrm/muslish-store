@@ -1,6 +1,6 @@
 "use client";
 
-import { MY_ORDERS_QUERY_RESULT, Order } from "@/sanity.types";
+import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import React, { useEffect, useState } from "react";
 import { TableBody, TableCell, TableRow } from "./ui/table";
 import {
@@ -18,7 +18,7 @@ interface OrdersComponentsProps {
 }
 
 const OrdersComponents = ({ orders }: OrdersComponentsProps) => {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<MY_ORDERS_QUERY_RESULT[number] | null>(null);
   useEffect(()=> console.log(selectedOrder), [selectedOrder])
   return (
     <>
