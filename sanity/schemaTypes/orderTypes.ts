@@ -4,7 +4,6 @@ export const orderType = defineType({
   name: "order",
   title: "Order",
   type: "document",
-  icon: "",
   fields: [
     defineField({
       name: "orderNumber",
@@ -173,7 +172,7 @@ export const orderType = defineType({
       return {
         title: `${select.name} (${orderIdSnippet})`,
         subtitle: `${select.email} ${select.amount} ${select.currency}`,
-        media: "",
+
       };
     },
   },
