@@ -12,8 +12,9 @@ interface Props {
 const ProductCard = ({ product }: Props) => {
   console.log(product);
   return (
-    <div className="rounded-lg group text-sm overflow-hidden">
-      <div className="bg-linear-to-r from-zinc-200 via-zinc-300 to-zinc-200 overflow-hidden relative">
+    <div className="rounded-lg group text-sm overflow-hidden h-full flex flex-col">
+      {/* الصورة: ارتفاع ثابت، لا تتمدد */}
+      <div className="bg-linear-to-r from-zinc-200 via-zinc-300 to-zinc-200 overflow-hidden relative shrink-0">
         {product?.Images && (
           <Link href={`/products/${product?.slug?.current}`}>
             <Image
@@ -26,19 +27,23 @@ const ProductCard = ({ product }: Props) => {
             />
           </Link>
         )}
-        {product?.stock === 0 && <div className="bg-darkColor/40 absolute top-0 left-0 w-full h-full flex items-center justify-center">
-          <p className="text-base text-white text-center">Out Of Stock</p>
-        </div>}
+        {product?.stock === 0 && (
+          <div className="bg-darkColor/40 absolute top-0 left-0 w-full h-full flex items-center justify-center">
+            <p className="text-base text-white text-center">Out Of Stock</p>
+          </div>
+        )}
       </div>
-      <div className="py-3 px-2 flex flex-col gap-1.5 bg-zinc-50 border border-t-0 rounded-lg rounded-tl-none rounded-tr-none">
+
+      {/* القسم النصي: يأخذ كل المساحة المتبقية */}
+      <div className="py-3 px-2 flex flex-col gap-1.5 bg-zinc-50 border border-t-0 rounded-lg rounded-tl-none rounded-tr-none flex-1">
         <h2 className="font-semibold line-clamp-1">{product?.name}</h2>
-        <p>{product?.intro}</p>
+        <p className="line-clamp-2">{product?.intro}</p>
         <PriceView
           price={product?.price}
           discount={product?.discount}
           className="text-lg"
         />
-        <AddToCartButton product={product} />
+        <AddToCartButton product={product}/>
       </div>
     </div>
   );

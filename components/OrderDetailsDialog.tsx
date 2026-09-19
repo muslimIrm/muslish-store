@@ -35,6 +35,21 @@ const OrderDetailsDialog: FC<Props> = ({ order, isOpen, onClose }) => {
             <strong>Email: </strong> {order?.email}
           </p>
           <p>
+            <strong>Country: </strong> {order?.shippingAddress?.country}
+          </p>
+          <p>
+            <strong>City: </strong> {order?.shippingAddress?.city}
+          </p>
+          <p>
+            <strong>Line1: </strong> {order?.shippingAddress?.line1}
+          </p>
+          <p>
+            <strong>Line2: </strong> {order?.shippingAddress?.line2}
+          </p>
+          <p>
+            <strong>Postal Code: </strong> {order?.shippingAddress?.postalCode}
+          </p>
+          <p>
             <strong>Date: </strong>{" "}
             {order?.orderDate
               ? format(new Date(order.orderDate), "dd/MM/yyyy")

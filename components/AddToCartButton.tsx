@@ -16,7 +16,7 @@ const AddToCartButton = ({ product, className }: Props) => {
   console.log(isOutStock)
   let itemCount = getItemCount(product._id);
   return (
-    <div className="w-full h-12 flex items-center">
+    <div className="w-full h-12 flex items-center mt-auto">
       {itemCount !== 0 ? (
         <div className="w-full text-sm">
           <div className="flex justify-between items-center">

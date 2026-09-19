@@ -1,5 +1,7 @@
 "use server";
 import { stripe } from "@/lib/stripe";
+import { Product } from "@/sanity.types";
+import { getProductBySlug } from "@/sanity/helpers/queries";
 import { urlFor } from "@/sanity/lib/image";
 import { CartItem } from "@/store";
 import Stripe from "stripe";
@@ -16,11 +18,38 @@ interface itemsCart {
   quantity: number;
 }
 
+// Discriminated union: TypeScript forces you to check `success`
+// before accessing `url` or `error`, preventing mix-ups between the two.
+type CheckoutResult =
+  | { success: true; url: string }
+  | { success: false; error: string };
+
 export default async function createCheckOutSession(
   items: itemsCart[],
   metadata: Metadata,
-) {
+): Promise<CheckoutResult> {
   try {
+    for (const item of items) {
+      const slug = item?.product?.slug?.current;
+
+      if (!slug) {
+        return {
+          success: false,
+          error: `Could not find product data for "${item?.product?.name ?? "this item"}".`,
+        };
+      }
+
+      const freshProduct: Product = (await getProductBySlug(slug)) as Product;
+      const availableStock = freshProduct?.stock ?? 0;
+
+      if (!freshProduct || availableStock < item.quantity) {
+        return {
+          success: false,
+          error: `Sorry, "${item?.product?.name ?? "this product"}" no longer has enough stock available.`,
+        };
+      }
+    }
+
     const customers = await stripe.customers.list({
       email: metadata.customerEmail,
       limit: 1,
@@ -33,6 +62,20 @@ export default async function createCheckOutSession(
         customerName: metadata.customerName,
         customerEmail: metadata.customerEmail,
         clerkUserId: metadata.clerkUserId,
+      },
+      shipping_address_collection: {
+        allowed_countries: [
+          "US",
+          "CA",
+          "GB",
+          "SA",
+          "AE",
+          "EG",
+          "KW",
+          "BH",
+          "QA",
+          "OM",
+        ],
       },
       mode: "payment",
       allow_promotion_codes: true,
@@ -67,9 +110,20 @@ export default async function createCheckOutSession(
     }
 
     const session = await stripe.checkout.sessions.create(sessionPayload);
-    return session.url;
+
+    if (!session.url) {
+      return {
+        success: false,
+        error: "Could not generate a checkout link. Please try again.",
+      };
+    }
+
+    return { success: true, url: session.url };
   } catch (error) {
-    console.error("error creating checkout session:", error);
-    throw error;
+    console.error("Error creating checkout session:", error);
+    return {
+      success: false,
+      error: "Something went wrong while creating your checkout session. Please try again.",
+    };
   }
 }

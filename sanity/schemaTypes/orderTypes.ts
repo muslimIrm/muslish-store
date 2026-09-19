@@ -35,6 +35,24 @@ export const orderType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "shippingAddress",
+      title: "Shipping Address",
+      type: "object",
+      fields: [
+        defineField({ name: "name", title: "Recipient Name", type: "string" }),
+        defineField({ name: "line1", title: "Address Line 1", type: "string" }),
+        defineField({ name: "line2", title: "Address Line 2", type: "string" }),
+        defineField({ name: "city", title: "City", type: "string" }),
+        defineField({ name: "state", title: "State / Region", type: "string" }),
+        defineField({
+          name: "postalCode",
+          title: "Postal Code",
+          type: "string",
+        }),
+        defineField({ name: "country", title: "Country", type: "string" }),
+      ],
+    }),
+    defineField({
       name: "email",
       title: "Customer Email",
       type: "string",
@@ -122,7 +140,7 @@ export const orderType = defineType({
       type: "number",
       validation: (Rule) => Rule.required(),
     }),
-  
+
     defineField({
       name: "status",
       title: "Order Status",
@@ -143,12 +161,12 @@ export const orderType = defineType({
           },
           {
             title: "Delivered",
-            value: "delivered"
+            value: "delivered",
           },
           {
             title: "Canceled",
-            value: "canceled"
-          }
+            value: "canceled",
+          },
         ],
       },
     }),
@@ -156,8 +174,8 @@ export const orderType = defineType({
       name: "orderDate",
       title: "Order Date",
       type: "datetime",
-      validation: (Rule)=> Rule.required()
-    })
+      validation: (Rule) => Rule.required(),
+    }),
   ],
   preview: {
     select: {
@@ -168,11 +186,10 @@ export const orderType = defineType({
       email: "email",
     },
     prepare(select) {
-      const orderIdSnippet = `${select.orderId.slice(0, 5)}...${select.orderId.slice(-5)}`
+      const orderIdSnippet = `${select.orderId.slice(0, 5)}...${select.orderId.slice(-5)}`;
       return {
         title: `${select.name} (${orderIdSnippet})`,
         subtitle: `${select.email} ${select.amount} ${select.currency}`,
-
       };
     },
   },

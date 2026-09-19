@@ -1,7 +1,6 @@
-import React from "react";
 import { requiredUser } from "@/hooks/RequiredUser";
-import { auth } from "@clerk/nextjs/server";
-import { getMyOrders } from "@/sanity/helpers/queries";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { getAllOrders, getMyOrders } from "@/sanity/helpers/queries";
 import { redirect } from "next/navigation";
 import Container from "@/components/Container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,20 +12,31 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TableHead, TableHeader, TableRow, Table } from "@/components/ui/table";
 import OrdersComponents from "@/components/OrdersComponents";
 import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
-const OrdersPage = async () => {
+import OrderRole from "@/components/OrderRole";
+
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+const OrdersPage = async ({ searchParams }: PageProps) => {
   await requiredUser();
+  const user = await currentUser();
+  const userRole = (user?.publicMetadata?.role as string) || "user";
+  const filters = await searchParams;
+  const roleQuery = filters.role || "user";
   const { userId } = await auth();
   if (!userId) {
     return redirect("/");
   }
-  const orders = await getMyOrders(userId);
-  console.log(orders)
+  const isAdminMode = userRole == "admin" && roleQuery == "admin";
+  console.log("Hii, ", isAdminMode)
+  const orders = isAdminMode ? await getAllOrders() : await getMyOrders(userId);
   return (
     <Container className="py-10">
       {orders?.length ? (
         <Card className="w-full">
-          <CardHeader>
+          <CardHeader className="flex w-full justify-between">
             <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
+            {userRole == "admin" && <OrderRole />}
           </CardHeader>
           <CardContent>
             <ScrollArea className={"w-full"}>
@@ -39,6 +49,9 @@ const OrdersPage = async () => {
                     <TableHead className="hidden md:table-cell">
                       Email
                     </TableHead>
+                    <TableHead>
+                      Address
+                    </TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="hidden md:table-cell">
@@ -46,7 +59,7 @@ const OrdersPage = async () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <OrdersComponents orders={orders as MY_ORDERS_QUERY_RESULT} />
+                <OrdersComponents orders={orders as MY_ORDERS_QUERY_RESULT} isAdminMode={isAdminMode}/>
               </Table>
               <ScrollBar />
             </ScrollArea>
@@ -73,6 +86,8 @@ const OrdersPage = async () => {
           </Button>
         </div>
       )}
+
+      
     </Container>
   );
 };

@@ -33,6 +33,15 @@ export type Order = {
   stripeCustomerId?: string;
   clerkUserId?: string;
   customerName?: string;
+  shippingAddress?: {
+    name?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
   email?: string;
   stripePaymentIntentId?: string;
   invoice?: {
@@ -134,6 +143,15 @@ export type Category = {
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     _type: "image";
+  };
+  shippingAddress?: {
+    name?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
   };
 };
 
@@ -254,6 +272,42 @@ export type AllSanitySchemaTypes =
   | Geopoint;
 
 // Source: sanity/helpers/queries.tsx
+// Variable: PRODUCTS_BY_VARIANT_QUERY
+// Query: {      "products": *[_type == "product" && variant == $variant] | order(name asc) [$start...$end],      "total": count(*[_type == "product" && variant == $variant])    }
+export type PRODUCTS_BY_VARIANT_QUERY_RESULT = {
+  products: Array<{
+    _id: string;
+    _type: "product";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    name?: string;
+    slug?: Slug;
+    Images?: Array<{
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+      _key: string;
+    }>;
+    intro?: string;
+    description?: string;
+    price?: number;
+    discount?: number;
+    categories?: Array<
+      {
+        _key: string;
+      } & CategoryReference
+    >;
+    stock?: number;
+    status?: "hot" | "new" | "sale";
+    variant?: "hoodie" | "jacket" | "short";
+  }>;
+  total: number;
+};
+
+// Source: sanity/helpers/queries.tsx
 // Variable: CATEGORIES_QUERY
 // Query: *[_type == "category"] | order(name asc)
 export type CATEGORIES_QUERY_RESULT = Array<{
@@ -272,6 +326,86 @@ export type CATEGORIES_QUERY_RESULT = Array<{
     crop?: SanityImageCrop;
     _type: "image";
   };
+  shippingAddress?: {
+    name?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+}>;
+
+// Source: sanity/helpers/queries.tsx
+// Variable: ALL_ORDERS_QUERY
+// Query: *[_type == "order"] | order(orderDate desc){      ...,      products[]{      ...,      product->    }    }
+export type ALL_ORDERS_QUERY_RESULT = Array<{
+  _id: string;
+  _type: "order";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  orderNumber?: string;
+  stripeCheckoutSessionId?: string;
+  stripeCustomerId?: string;
+  clerkUserId?: string;
+  customerName?: string;
+  shippingAddress?: {
+    name?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  email?: string;
+  stripePaymentIntentId?: string;
+  invoice?: {
+    id?: string;
+    number?: string;
+    hosted_invoice_url?: string;
+  };
+  products: Array<{
+    product: {
+      _id: string;
+      _type: "product";
+      _createdAt: string;
+      _updatedAt: string;
+      _rev: string;
+      name?: string;
+      slug?: Slug;
+      Images?: Array<{
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+        _key: string;
+      }>;
+      intro?: string;
+      description?: string;
+      price?: number;
+      discount?: number;
+      categories?: Array<
+        {
+          _key: string;
+        } & CategoryReference
+      >;
+      stock?: number;
+      status?: "hot" | "new" | "sale";
+      variant?: "hoodie" | "jacket" | "short";
+    } | null;
+    quantity?: number;
+    _type: "orderItem";
+    _key: string;
+  }> | null;
+  totalPrice?: number;
+  currency?: string;
+  amountDiscount?: number;
+  status?: "canceled" | "delivered" | "paid" | "pending" | "shipped";
+  orderDate?: string;
 }>;
 
 // Source: sanity/helpers/queries.tsx
@@ -288,6 +422,15 @@ export type MY_ORDERS_QUERY_RESULT = Array<{
   stripeCustomerId?: string;
   clerkUserId?: string;
   customerName?: string;
+  shippingAddress?: {
+    name?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
   email?: string;
   stripePaymentIntentId?: string;
   invoice?: {
@@ -340,7 +483,9 @@ export type MY_ORDERS_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
+    '{\n      "products": *[_type == "product" && variant == $variant] | order(name asc) [$start...$end],\n      "total": count(*[_type == "product" && variant == $variant])\n    }': PRODUCTS_BY_VARIANT_QUERY_RESULT;
     '*[_type == "category"] | order(name asc)': CATEGORIES_QUERY_RESULT;
+    '*[_type == "order"] | order(orderDate desc){\n      ...,\n      products[]{\n      ...,\n      product->\n    }\n    }': ALL_ORDERS_QUERY_RESULT;
     '*[_type == "order" && clerkUserId == $userId] | order(orderDate desc){\n      ...,\n      products[]{\n      ...,\n      product->\n    }\n    }': MY_ORDERS_QUERY_RESULT;
   }
 }

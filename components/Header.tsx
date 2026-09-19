@@ -9,13 +9,26 @@ import { ClerkLoaded, SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ListOrdered } from "lucide-react";
 import { GetAllCategories, getMyOrders } from "@/sanity/helpers/queries";
+import { Category } from "@/sanity.types";
 const Header = async () => {
   const user = await currentUser();
-  const {userId} = await auth()
-  const categories = await GetAllCategories();
-  let orders=null;
-  if(userId){
-    orders = await getMyOrders(userId);
+  const { userId } = await auth();
+  let categories: Category[] = [];
+  try {
+    categories = (await GetAllCategories()) ?? [];
+  } catch (e) {
+    console.error("Failed to fetch categories in Header:", e);
+    categories = [];
+  }
+
+  let orders = [];
+  if (userId) {
+    try {
+      orders = (await getMyOrders(userId)) ?? [];
+    } catch (e) {
+      console.error("Failed to fetch orders in Header:", e);
+      orders = [];
+    }
   }
   return (
     <header
@@ -24,7 +37,7 @@ const Header = async () => {
       <Container
         className={"flex items-center justify-between gap-7 text-lightColor"}
       >
-        <HeaderMenu categories={categories}/>
+        <HeaderMenu categories={categories} />
         <div className="w-auto md:w-1/3 flex items-center justify-center gap-2.5">
           <MobileMenu />
           <Logo>Muslish</Logo>

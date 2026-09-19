@@ -8,12 +8,16 @@ interface Props {
 }
 const HomeTabbar = ({ selectedTab, onTabSelect }: Props) => {
   return (
-    <div className={"flex items-center gap-1.5 text-sm font-semibold"}>
-      <div className="flex items-center gap-1.5">
+    <div
+      className={
+        "flex items-center justify-center gap-1.5 text-sm font-semibold w-full"
+      }
+    >
+      <div className="flex items-center justify-center gap-1.5 w-full flex-wrap">
         {ProductType?.map((item) => (
           <button
             key={item?.title}
-            onClick={()=> onTabSelect(item?.title)}
+            onClick={() => onTabSelect(item?.title)}
             className={`border
              border-darkColor 
              px-4 py-1.5 
@@ -27,18 +31,18 @@ const HomeTabbar = ({ selectedTab, onTabSelect }: Props) => {
             {item?.title}
           </button>
         ))}
-      </div>
-      <button
-        className="border
+        <button
+          className="border
              border-darkColor 
              p-2 
              hover:text-white hover:bg-darkColor 
              rounded-full 
              hoverEffect 
              cursor-pointer"
-      >
-        <Repeat className="w-5 h-5" />
-      </button>
+        >
+          <Repeat className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 };

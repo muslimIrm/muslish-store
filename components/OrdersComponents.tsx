@@ -12,26 +12,29 @@ import {
 import { format } from "date-fns";
 import PriceFormatter from "./PriceFormatter";
 import OrderDetailsDialog from "./OrderDetailsDialog";
+import SelectProductStatus from "./SelectProductStatus";
 
 interface OrdersComponentsProps {
   orders: MY_ORDERS_QUERY_RESULT;
+  isAdminMode: boolean;
 }
 
-const OrdersComponents = ({ orders }: OrdersComponentsProps) => {
-  const [selectedOrder, setSelectedOrder] = useState<MY_ORDERS_QUERY_RESULT[number] | null>(null);
-  useEffect(()=> console.log(selectedOrder), [selectedOrder])
+const OrdersComponents = ({ orders, isAdminMode }: OrdersComponentsProps) => {
+  const [selectedOrder, setSelectedOrder] = useState<
+    MY_ORDERS_QUERY_RESULT[number] | null
+  >(null);
+  useEffect(() => console.log(selectedOrder), [selectedOrder]);
   return (
     <>
       <TooltipProvider>
         <TableBody>
           {orders?.map((order) => (
             <Tooltip key={order._id}>
-              {/* دمج التنسيقات داخل عنصر TableRow الممرر للـ render مباشرة ومنع تكرار المكون */}
               <TooltipTrigger
                 render={
                   <TableRow className="cursor-pointer hover:bg-muted/50 h-12 transition-colors" />
                 }
-                onClick={()=> setSelectedOrder(order)}
+                onClick={() => setSelectedOrder(order)}
               >
                 <TableCell className="font-medium">
                   {order.orderNumber?.slice(-10) ?? "N/A"}
@@ -48,7 +51,10 @@ const OrdersComponents = ({ orders }: OrdersComponentsProps) => {
                 <TableCell className="hidden md:table-cell">
                   {order.email ?? "N/A"}
                 </TableCell>
-
+                <TableCell>
+                  {order?.shippingAddress?.country} - 
+                  {order?.shippingAddress?.city}
+                </TableCell>
                 <TableCell>
                   <PriceFormatter
                     amount={order.totalPrice}
@@ -56,8 +62,13 @@ const OrdersComponents = ({ orders }: OrdersComponentsProps) => {
                   />
                 </TableCell>
 
-                <TableCell>
-                  {order.status && (
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  {order.status && isAdminMode ? (
+                    <SelectProductStatus
+                      initialStatus={order.status}
+                      orderId={order?._id}
+                    />
+                  ) : (
                     <span
                       className={`px-2 py-1 text-xs rounded-full font-semibold capitalize ${
                         order.status === "paid"

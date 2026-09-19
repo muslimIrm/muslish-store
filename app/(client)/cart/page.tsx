@@ -22,7 +22,10 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import paypal from "@/images/paypal.png";
-import createCheckOutSession, { Metadata } from "@/actions/createCheckOutSession";
+import createCheckOutSession, {
+  Metadata,
+} from "@/actions/createCheckOutSession";
+import ErrorDialog from "@/components/ErrorDialog";
 const page = () => {
   const {
     deleteCartProduct,
@@ -33,9 +36,10 @@ const page = () => {
     getGroupedItems,
   } = useCartStore();
   const [isClient, setIsClient] = useState(false);
-  const [loading,setLoading] = useState(false)
-  const {user} = useUser();
+  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
   const { isSignedIn } = useAuth();
+  const [errorMessage, setErrorMessage] = useState<null | string>(null);
   useEffect(() => setIsClient(true), []);
   if (!isClient) {
     return <Loading />;
@@ -55,21 +59,27 @@ const page = () => {
 
   const handleCheckout = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const metadata: Metadata = {
         orderNumber: crypto.randomUUID(),
         customerName: user?.fullName || "Unknown",
         customerEmail: user?.emailAddresses[0].emailAddress || "Unknown",
         clerkUserId: user!.id,
-      }
-      const checkoutUrl = await createCheckOutSession(cartProduct, metadata);
-      if(checkoutUrl){
-        window.location.href = checkoutUrl
+      };
+
+      const result = await createCheckOutSession(cartProduct, metadata);
+
+      if (result.success) {
+        window.location.href = result.url;
+      } else {
+        setErrorMessage(result.error);
       }
     } catch (error) {
-      console.error("error creating checkout session:", error)
-    } finally{
-      setLoading(false)
+      console.error("Unexpected error creating checkout session:", error);
+      setErrorMessage("Something unexpected happened. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -205,6 +215,7 @@ const page = () => {
                       </div>
                       <Button
                         onClick={handleCheckout}
+                        disabled={loading}
                         size={"lg"}
                         className={
                           "w-full rounded-full font-semibold tracking-wide"
@@ -269,6 +280,13 @@ const page = () => {
             </>
           ) : (
             <EmptyCart />
+          )}
+          {errorMessage && (
+            <ErrorDialog
+              message={errorMessage}
+              open={!!errorMessage}
+              onOpenChange={() => setErrorMessage(null)}
+            />
           )}
         </Container>
       ) : (

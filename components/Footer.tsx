@@ -5,8 +5,17 @@ import Logo from "./Logo";
 import SocialMedia from "./socialMedia";
 import { categoriesData, quickLinksData } from "@/constants";
 import Link from "next/link";
+import { Category } from "@/sanity.types";
+import { GetAllCategories } from "@/sanity/helpers/queries";
 
-const Footer = () => {
+const Footer = async () => {
+  let categories: Category[] = [];
+  try {
+    categories = (await GetAllCategories()) ?? [];
+  } catch (e) {
+    console.error("Failed to fetch categories in Header:", e);
+    categories = [];
+  }
   return (
     <div className={"border-t"}>
       <Container>
@@ -43,9 +52,9 @@ const Footer = () => {
           <div>
             <h3 className={"font-semibold text-darkColor mb-4"}>Categories</h3>
             <div className="flex flex-col gap-3">
-              {categoriesData?.map((item, index) => (
+              {categories?.map((item, index) => (
                 <Link
-                  href={`/categories${item?.href}`}
+                  href={`/categories/${item?.slug?.current}`}
                   key={index}
                   className={
                     "text-gray-600 text-sm font-medium hover:text-darkColor hoverEffect"
