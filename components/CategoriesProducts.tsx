@@ -25,14 +25,11 @@ const CategoriesProducts = ({ categories, slug }: Props) => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isError, setIsError] = useState<{ status: boolean; message: string }>({
-    status: false,
-    message: "",
-  });
+  const [isError, setIsError] = useState<string>("");
 
   const fetchProducts = async (categorySlug: string) => {
     setLoading(true);
-    setIsError({ status: false, message: "" });
+    setIsError("");
     try {
       const response = await getProductsByCategories({
         category: categorySlug,
@@ -50,7 +47,7 @@ const CategoriesProducts = ({ categories, slug }: Props) => {
             ? e.message
             : "There was an error, please try again.";
 
-      setIsError({ message: errorMessage, status: true });
+      setIsError(errorMessage);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -93,9 +90,9 @@ const CategoriesProducts = ({ categories, slug }: Props) => {
           </div>
         ) : (
           <>
-            {isError.status ? (
+            {!!isError ? (
               <ErrorFetchingProducts
-                errorMessage={isError.message}
+                errorMessage={isError}
                 onRetry={() => fetchProducts(currentSlug)}
               />
             ) : products.length ? (

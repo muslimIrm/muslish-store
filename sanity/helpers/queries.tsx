@@ -40,7 +40,7 @@ export const getProductsByVariant = async ({
   };
   try {
     const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, params, {
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     const products = (response?.products as Product[]) || [];
@@ -83,7 +83,7 @@ export const getProductsByCategories = async ({
   };
   try {
     const response = await client.fetch(PRODUCTS_BY_CATEGORY_QUERY, params, {
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     const products = (response?.products as Product[]) || [];
@@ -130,9 +130,6 @@ export const GetAllCategories = async () => {
     return categories?.data || [];
   } catch (error) {
     console.error("Error fetching all categories:", error);
-    // Categories are secondary (used in the Header). Fail silently
-    // with an empty array — never return an Error object here, since
-    // callers expect Category[] and would crash trying to `.map()` an Error.
     return [];
   }
 };
@@ -218,11 +215,9 @@ export const searchProducts = async ({
   };
 
   try {
-    const response = await client.fetch(
-      SEARCH_PRODUCTS_QUERY,
-      params,
-      { cache: "no-store" },
-    );
+    const response = await client.fetch(SEARCH_PRODUCTS_QUERY, params, {
+      next: { revalidate: 60 },
+    });
 
     const products = (response?.products as Product[]) || [];
     const total = response?.total || 0;

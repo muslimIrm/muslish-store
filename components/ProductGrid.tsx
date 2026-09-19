@@ -27,10 +27,7 @@ const ProductGrid = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(2);
-  const [isError, setIsError] = useState<{ status: boolean; message: string }>({
-    status: false,
-    message: "",
-  });
+  const [isError, setIsError] = useState<string>("");
   useEffect(() => {
     setPage(1);
   }, [selectedTab]);
@@ -38,7 +35,7 @@ const ProductGrid = () => {
   const fetchData = async () => {
     console.log(page);
     setLoading(true);
-    setIsError({ ...isError, status: false });
+    setIsError("");
     try {
       const response = await getProductsByVariant({
         selectedTab: selectedTab.toLowerCase(),
@@ -56,7 +53,7 @@ const ProductGrid = () => {
             ? e.message
             : "there was something error, try again.";
 
-      setIsError({ message: errorMessage, status: true });
+      setIsError(errorMessage);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -77,39 +74,35 @@ const ProductGrid = () => {
             </span>
           </div>
         </div>
+      ) : !!isError ? (
+        <ErrorFetchingProducts
+          errorMessage={isError}
+          onRetry={fetchData}
+        />
+      ) : products.length ? (
+        <div className="flex flex-col space-y-4 w-full">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-10 w-full">
+            {products?.map((product: Product) => (
+              <AnimatePresence key={product?._id}>
+                <motion.div
+                  layout
+                  initial={{ opacity: 0.2 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              </AnimatePresence>
+            ))}
+          </div>
+          <PaginatedButton
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </div>
       ) : (
-        <>
-          {products.length ? (
-            <div className="flex flex-col space-y-4 w-full">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-10 w-full">
-                {products?.map((product: Product) => (
-                  <AnimatePresence key={product?._id}>
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0.2 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <ProductCard product={product} />
-                    </motion.div>
-                  </AnimatePresence>
-                ))}
-              </div>
-              <PaginatedButton
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            </div>
-          ) : isError.status ? (
-            <ErrorFetchingProducts
-              errorMessage={isError.message}
-              onRetry={fetchData}
-            />
-          ) : (
-            <NoProductsAvailable selectedTab={selectedTab} />
-          )}
-        </>
+        <NoProductsAvailable selectedTab={selectedTab} />
       )}
     </div>
   );
