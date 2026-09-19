@@ -16,7 +16,7 @@ import {
 import { urlFor } from "@/sanity/lib/image";
 import { useCartStore } from "@/store";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { Heart, ShoppingBag, Trash } from "lucide-react";
+import { Heart, Loader2, ShoppingBag, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -103,7 +103,7 @@ const page = () => {
                           key={product?._id}
                           className="border-b last:border-b-0 flex items-center justify-between p-2.5 gap-5"
                         >
-                          <div className="flex flex-1 items-center gap-2 h-36 md:h-44">
+                          <div className="flex flex-1 items-center gap-2 h-36 max-h-38 md:h-44">
                             {product?.Images && (
                               <Link
                                 href={`/products/${product?.slug?.current}`}
@@ -124,7 +124,7 @@ const page = () => {
                                 <h2 className="font-semibold line-clamp-1">
                                   {product?.name}
                                 </h2>
-                                <p className="text-sm text-lightColor font-medium">
+                                <p className="text-sm text-lightColor font-medium max-sm:hidden">
                                   {product?.intro}
                                 </p>
                                 <p className=" capitalize text-sm">
@@ -222,6 +222,7 @@ const page = () => {
                         }
                       >
                         Proceed to Checkout
+                        {loading && <Loader2 className=" animate-spin"/>}
                       </Button>
                       <Link
                         href={"/"}
